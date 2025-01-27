@@ -124,12 +124,12 @@ struct ActionRow: View {
 
       if action.type == .application {
         Button("Choose...") {
-            let panel = NSOpenPanel()
-            panel.allowedContentTypes = [.applicationBundle, .application]
-            panel.canChooseFiles = true
-            panel.canChooseDirectories = true
-            panel.allowsMultipleSelection = false
-            panel.directoryURL = URL(fileURLWithPath: "/Applications")
+          let panel = NSOpenPanel()
+          panel.allowedContentTypes = [.applicationBundle, .application]
+          panel.canChooseFiles = true
+          panel.canChooseDirectories = true
+          panel.allowsMultipleSelection = false
+          panel.directoryURL = URL(fileURLWithPath: "/Applications")
 
           if panel.runModal() == .OK {
             action.value = panel.url?.path ?? ""
@@ -141,6 +141,7 @@ struct ActionRow: View {
           panel.allowsMultipleSelection = false
           panel.canChooseDirectories = true
           panel.canChooseFiles = false
+          panel.directoryURL = FileManager.default.homeDirectoryForCurrentUser
 
           if panel.runModal() == .OK {
             action.value = panel.url?.path ?? ""
