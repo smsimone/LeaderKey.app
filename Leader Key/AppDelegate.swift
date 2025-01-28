@@ -70,6 +70,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         self.show()
       }
     }
+      
+      Debouncer.appDismissDebouncer = Debouncer(delay: config.root.timeout, action: { self.hide() })
   }
 
   @IBAction
@@ -80,6 +82,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
   func show() {
     controller.show()
+    Debouncer.appDismissDebouncer?.call()
   }
 
   func hide() {

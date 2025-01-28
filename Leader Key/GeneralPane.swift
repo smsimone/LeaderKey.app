@@ -14,7 +14,7 @@ struct GeneralPane: View {
       ) {
         VStack(alignment: .leading) {
           VStack {
-            ConfigEditorView(group: $config.root)
+              ConfigEditorView(group: $config.root.group)
               .frame(height: 400)
           }
           .padding(8)
@@ -25,19 +25,33 @@ struct GeneralPane: View {
               .opacity(0.1)
           )
 
-          HStack {
-            Button("Save to file") {
-              config.saveConfig()
-            }
+            VStack{
+                HStack {
+                    Picker("Timeout", selection: $config.root.timeout) {
+                        Text("500ms").tag(500)
+                        Text("1s").tag(1000)
+                        Text("2s").tag(2000)
+                      }
+                      .frame(width: 150)
+                    Spacer()
+                }
+                HStack {
+                  Button("Save to file") {
+                    config.saveConfig()
+                  }
 
-            Button("Reload from file") {
-              config.reloadConfig()
-            }
+                  Button("Reload from file") {
+                    config.reloadConfig()
+                  }
 
-            Button("Reveal config file in Finder") {
-              NSWorkspace.shared.activateFileViewerSelecting([config.fileURL()])
+                  Button("Reveal config file in Finder") {
+                    NSWorkspace.shared.activateFileViewerSelecting([config.fileURL()])
+                  }
+                
+                  Spacer()
+                }
+
             }
-          }
         }
       }
 

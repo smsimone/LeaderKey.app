@@ -37,6 +37,8 @@ class Controller {
   }
 
   func keyDown(with event: NSEvent) {
+      Debouncer.appDismissDebouncer?.call()
+
     if event.modifierFlags.contains(.command) {
       switch event.charactersIgnoringModifiers {
       case ",":
@@ -60,7 +62,7 @@ class Controller {
     default:
       let char = event.charactersIgnoringModifiers?.lowercased()
 
-      let list = (userState.currentGroup != nil) ? userState.currentGroup : userConfig.root
+        let list = (userState.currentGroup != nil) ? userState.currentGroup : userConfig.root.group
 
       let hit = list?.actions.first { item in
         switch item {

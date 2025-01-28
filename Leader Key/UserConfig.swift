@@ -3,8 +3,8 @@ import Combine
 import Defaults
 
 class UserConfig: ObservableObject {
-  @Published var root = Group(actions: [])
-
+    @Published var root = UserSettings.defaultVal()
+    
   let fileName = "config.json"
   let fileMonitor = FileMonitor()
 
@@ -67,7 +67,7 @@ class UserConfig: ObservableObject {
         alert.alertStyle = .critical
         alert.messageText = "\(error)"
         alert.runModal()
-        root = Group(actions: [])
+          root = UserSettings.defaultVal()
       }
     }
 
@@ -86,16 +86,16 @@ class UserConfig: ObservableObject {
       if let jsonData = readConfigFile().data(using: .utf8) {
         let decoder = JSONDecoder()
         do {
-          let root_ = try decoder.decode(Group.self, from: jsonData)
+          let root_ = try decoder.decode(UserSettings.self, from: jsonData)
           root = root_
         } catch {
           handleConfigError(error)
         }
       } else {
-        root = Group(actions: [])
+          root = UserSettings.defaultVal()
       }
     } else {
-      root = Group(actions: [])
+        root = UserSettings.defaultVal()
     }
   }
 
@@ -104,7 +104,7 @@ class UserConfig: ObservableObject {
     alert.alertStyle = .critical
     alert.messageText = "\(error)"
     alert.runModal()
-    root = Group(actions: [])
+      root = UserSettings.defaultVal()
   }
 
   func reloadConfig() {
@@ -133,29 +133,32 @@ class UserConfig: ObservableObject {
 
 let defaultConfig = """
   {
-      "type": "group",
-      "actions": [
-          { "key": "t", "type": "application", "value": "/System/Applications/Utilities/Terminal.app" },
-          {
-              "key": "o",
-              "type": "group",
-              "actions": [
-                  { "key": "s", "type": "application", "value": "/Applications/Safari.app" },
-                  { "key": "e", "type": "application", "value": "/Applications/Mail.app" },
-                  { "key": "i", "type": "application", "value": "/System/Applications/Music.app" },
-                  { "key": "m", "type": "application", "value": "/Applications/Messages.app" }
-              ]
-          },
-          {
-              "key": "r",
-              "type": "group",
-              "actions": [
-                  { "key": "e", "type": "url", "value": "raycast://extensions/raycast/emoji-symbols/search-emoji-symbols" },
-                  { "key": "p", "type": "url", "value": "raycast://confetti" },
-                  { "key": "c", "type": "url", "value": "raycast://extensions/raycast/system/open-camera" }
-              ]
-          }
-      ]
+      "timeout": 2000,
+      "group": {
+          "type": "group",
+          "actions": [
+              { "key": "t", "type": "application", "value": "/System/Applications/Utilities/Terminal.app" },
+              {
+                  "key": "o",
+                  "type": "group",
+                  "actions": [
+                      { "key": "s", "type": "application", "value": "/Applications/Safari.app" },
+                      { "key": "e", "type": "application", "value": "/Applications/Mail.app" },
+                      { "key": "i", "type": "application", "value": "/System/Applications/Music.app" },
+                      { "key": "m", "type": "application", "value": "/Applications/Messages.app" }
+                  ]
+              },
+              {
+                  "key": "r",
+                  "type": "group",
+                  "actions": [
+                      { "key": "e", "type": "url", "value": "raycast://extensions/raycast/emoji-symbols/search-emoji-symbols" },
+                      { "key": "p", "type": "url", "value": "raycast://confetti" },
+                      { "key": "c", "type": "url", "value": "raycast://extensions/raycast/system/open-camera" }
+                  ]
+              }
+          ]
+      }
   }
   """
 
@@ -165,6 +168,20 @@ enum Type: String, Codable {
   case url
   case command
   case folder
+}
+
+struct UserSettings: Codable {
+    var group: Group
+    var timeout: Int {
+        didSet {
+            guard let current = Debouncer.appDismissDebouncer else { return }
+            current.setNewDelay(delay: timeout)
+        }
+    }
+    
+    static func defaultVal () -> UserSettings {
+        return UserSettings(group: Group(actions: []), timeout: 2000)
+    }
 }
 
 struct Action: Codable {
